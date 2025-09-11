@@ -1,57 +1,73 @@
-
-
 <div class="container">
   <h1>All Submissions</h1>
 
-  <% if (submissions.length === 0) { %>
+  <% if (submissions.length===0) { %>
     <p>No submissions found.</p>
-  <% } else { %>
-    <div class="table-responsive">
-      <table class="submissions-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Original</th>
-            <th>Swapped</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% submissions.forEach(sub => { %>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="submissions-table">
+          <thead>
             <tr>
-              <td><%= sub.name %></td>
-              <td><%= sub.email %></td>
-              <td><%= sub.phone %></td>
-              <td>
-                <% if(sub.originalImage) { %>
-                  <img src="/uploads/<%= sub.originalImage.filename %>" alt="Original" class="preview-img-small previewBtn" data-src="/uploads/<%= sub.originalImage.filename %>">
-                <% } else { %>
-                  N/A
-                <% } %>
-              </td>
-              <td>
-                <% if(sub.swappedImage) { %>
-                  <a href="/uploads/<%= sub.swappedImage.filename %>" download class="downloadBtn">Download</a>
-                <% } else { %>
-                  N/A
-                <% } %>
-              </td>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Original</th>
+              <th>Swapped</th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            <% submissions.forEach(sub=> { %>
+              <tr>
+                <td>
+                  <%= sub.name %>
+                </td>
+                <td>
+                  <%= sub.email %>
+                </td>
+                <td>
+                  <%= sub.phone %>
+                </td>
+                <td>
+                  <% if(sub.originalImage) { %>
+                    <img src="/uploads/<%= sub.originalImage.filename %>" alt="Original"
+                      class="preview-img-small previewBtn" data-src="/uploads/<%= sub.originalImage.filename %>">
+                    <% } else { %>
+                      N/A
+                      <% } %>
+                </td>
+                <td>
+                  <% if (sub.swappedImage) { %>
+                    <% if (sub.swappedImage.swappedImgURL) { %>
+                      <!-- Use hosted CloudFront URL -->
+                      <a href="<%= sub.swappedImage.swappedImgURL %>" download class="downloadBtn">Download</a>
+                      <% } else if (sub.swappedImage.filename) { %>
+                        <!-- Fallback: use local uploads folder -->
+                        <a href="/uploads/<%= sub.swappedImage.filename %>" download class="downloadBtn">Download</a>
+                        <% } else { %>
+                          N/A
+                          <% } %>
+                            <% } else { %>
+                              N/A
+                              <% } %>
+                </td>
 
-    <!-- Pagination -->
-    <% if(pagination.totalPages > 1) { %>
-      <div class="pagination">
-        <% for(let i=1; i <= pagination.totalPages; i++) { %>
-          <a href="?page=<%= i %>" class="<%= i === pagination.currentPage ? 'active' : '' %>"><%= i %></a>
-        <% } %>
+              </tr>
+              <% }) %>
+          </tbody>
+        </table>
       </div>
-    <% } %>
-  <% } %>
+
+      <!-- Pagination -->
+      <% if(pagination.totalPages> 1) { %>
+        <div class="pagination">
+          <% for(let i=1; i <=pagination.totalPages; i++) { %>
+            <a href="?page=<%= i %>" class="<%= i === pagination.currentPage ? 'active' : '' %>">
+              <%= i %>
+            </a>
+            <% } %>
+        </div>
+        <% } %>
+          <% } %>
 </div>
 
 <!-- Modal for preview -->
@@ -62,32 +78,31 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("modal");
-  const modalImage = document.getElementById("modalImage");
-  const closeModal = document.querySelector(".close");
+  document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modal");
+    const modalImage = document.getElementById("modalImage");
+    const closeModal = document.querySelector(".close");
 
-  // Preview button click
-  document.querySelectorAll(".previewBtn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      modal.style.display = "flex";
-      modalImage.src = btn.dataset.src;
+    // Preview button click
+    document.querySelectorAll(".previewBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        modal.style.display = "flex";
+        modalImage.src = btn.dataset.src;
+      });
     });
-  });
 
-  // Close modal
-  closeModal.addEventListener("click", () => {
-    modal.style.display = "none";
-    modalImage.src = "";
-  });
-
-  // Close modal on outside click
-  window.addEventListener("click", e => {
-    if(e.target === modal) {
+    // Close modal
+    closeModal.addEventListener("click", () => {
       modal.style.display = "none";
       modalImage.src = "";
-    }
-  });
-});
-</script>
+    });
 
+    // Close modal on outside click
+    window.addEventListener("click", e => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        modalImage.src = "";
+      }
+    });
+  });
+</script>

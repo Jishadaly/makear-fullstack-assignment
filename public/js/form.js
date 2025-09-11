@@ -5,8 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const styleImage = document.querySelector('input[name="styleImage"]');
   const inputPreview = document.getElementById("inputPreview");
   const stylePreview = document.getElementById("stylePreview");
-  const cameraBtn = document.getElementById("cameraInputBtn");
-  const cameraSelect = document.getElementById("cameraSelect");
   const termsCheckbox = document.getElementById("termsCheckbox");
 
   const modal = document.getElementById("resultModal");

@@ -1,16 +1,15 @@
+<html>
 
+<head>
 
+    <link rel="stylesheet" href="/public/css/style.css">
+</head>
+
+</html>
 <div class="container">
-    <h1><%= pageTitle %></h1>
-
-
-    <% if (error) { %>
-        <p class="error-msg"><%= error %></p>
-    <% } %>
-
-    <% if (success) { %>
-        <p class="success-msg"><%= success %></p>
-    <% } %>
+    <h1>
+        <%= pageTitle %>
+    </h1>
 
     <form id="faceSwapForm" enctype="multipart/form-data">
         <div class="form-group">
@@ -31,24 +30,19 @@
         <!-- Input Image -->
         <div class="form-group">
             <label>Input Image</label>
-            <div class="image-upload">
-                <select id="cameraSelect">
-                    <option value="">Upload File</option>
-                    <option value="user">Front Camera</option>
-                    <option value="environment">Back Camera</option>
-                </select>
-                <button type="button" id="cameraInputBtn">Capture / Upload</button>
-                <input type="file" name="inputImage" accept="image/*" style="display:none;" required>
-                <img id="inputPreview" class="preview-img" alt="Input Preview" style="display:none; max-width:200px; max-height:200px; margin-top:10px;">
-            </div>
+            <input type="file" name="inputImage" accept="image/*" required>
+            <img id="inputPreview" class="preview-img" alt="Input Preview"
+                style="display:none; max-width:200px; max-height:200px; margin-top:10px;">
         </div>
 
         <!-- Style Image -->
         <div class="form-group">
             <label>Style Image (Optional)</label>
             <input type="file" name="styleImage" accept="image/*">
-            <img id="stylePreview" class="preview-img" alt="Style Preview" style="display:none; max-width:200px; max-height:200px; margin-top:10px;">
+            <img id="stylePreview" class="preview-img" alt="Style Preview"
+                style="display:none; max-width:200px; max-height:200px; margin-top:10px;">
         </div>
+
 
         <!-- Terms & Conditions -->
         <div class="form-group checkbox">
@@ -62,17 +56,19 @@
 
 <!-- Result Modal -->
 <div id="resultModal" class="modal" style="display:none;">
-    <div class="modal-content" style="max-width:400px; margin:50px auto; background:#fff; padding:20px; border-radius:8px; text-align:center; position:relative;">
-        <span id="closeModal" style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px;">&times;</span>
+    <div class="modal-content"
+        style="max-width:400px; margin:50px auto; background:#fff; padding:20px; border-radius:8px; text-align:center; position:relative;">
+        <span id="closeModal"
+            style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px;">&times;</span>
         <h2>😎 Look Who’s Fancy Now!</h2>
         <p id="modalMessage"></p>
-        <img id="modalSwappedImg" style="max-width:100%; max-height:300px; margin-top:10px; border:1px solid #ccc; border-radius:8px;" alt="Swapped Image">
+        <img id="modalSwappedImg"
+            style="max-width:100%; max-height:300px; margin-top:10px; border:1px solid #ccc; border-radius:8px;"
+            alt="Swapped Image">
         <p id="modalRecommendations" style="margin-top:10px;"></p>
         <button id="modalDownloadBtn" style="margin-top:15px;">Download Image</button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="/js/form.js"></script>
-
-
+<script src="/public/js/form.js"></script>
