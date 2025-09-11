@@ -1,8 +1,113 @@
 
+// document.addEventListener("DOMContentLoaded", () => {
+//   const form = document.getElementById("faceSwapForm");
+//   const inputImage = document.querySelector('input[name="inputImage"]');
+//   const styleImage = document.querySelector('input[name="styleImage"]');
+//   const inputPreview = document.getElementById("inputPreview");
+//   const stylePreview = document.getElementById("stylePreview");
+//   const termsCheckbox = document.getElementById("termsCheckbox");
+
+//   const modal = document.getElementById("resultModal");
+//   const closeModal = document.getElementById("closeModal");
+//   const modalMessage = document.getElementById("modalMessage");
+//   const modalSwappedImg = document.getElementById("modalSwappedImg");
+//   const modalRecommendations = document.getElementById("modalRecommendations");
+//   const modalDownloadBtn = document.getElementById("modalDownloadBtn");
+
+//   // Preview logic
+//   function readAndPreview(fileInput, previewImg) {
+//     if (fileInput.files && fileInput.files[0]) {
+//       const reader = new FileReader();
+//       reader.onload = e => {
+//         previewImg.src = e.target.result;
+//         previewImg.style.display = "block";
+//       };
+//       reader.readAsDataURL(fileInput.files[0]);
+//     }
+//   }
+
+//   inputImage.addEventListener("change", () => readAndPreview(inputImage, inputPreview));
+//   styleImage.addEventListener("change", () => readAndPreview(styleImage, stylePreview));
+
+//   // Camera button
+//   cameraBtn.addEventListener("click", () => {
+//     const choice = cameraSelect.value;
+//     if (choice) {
+//       inputImage.setAttribute("capture", choice);
+//     } else {
+//       inputImage.removeAttribute("capture");
+//     }
+//     inputImage.click();
+//   });
+
+//   // Close modal
+//   closeModal.addEventListener("click", () => {
+//     modal.style.display = "none";
+//   });
+
+//   // Submit via fetch
+//   form.addEventListener("submit", async e => {
+//     e.preventDefault();
+
+//     if (!termsCheckbox.checked) {
+//       Swal.fire("Error ❌", "Please accept the Terms & Conditions", "error");
+//       return;
+//     }
+
+//     const formData = new FormData(form);
+
+//     try {
+//       Swal.fire({
+//         title: "Processing...",
+//         text: "Please wait while we swap the face 🤖",
+//         allowOutsideClick: false,
+//         didOpen: () => Swal.showLoading()
+//       });
+
+//       const res = await fetch("/submit", { method: "POST", body: formData });
+//       const data = await res.json();
+//       Swal.close();
+
+//       if (!res.ok || !data.success) {
+//         Swal.fire("Error ❌", data.error || "Something went wrong!", "error");
+//         return;
+//       }
+
+//       // Clear form
+//       form.reset();
+//       inputPreview.style.display = "none";
+//       stylePreview.style.display = "none";
+
+//       // Show modal with results
+//       modal.style.display = "block";
+//       modalMessage.textContent = data.message;
+//       if (data.swappedImgURL) {
+//         modalSwappedImg.src = data.swappedImgURL;
+//         modalDownloadBtn.onclick = () => {
+//           const link = document.createElement('a');
+//           link.href = data.swappedImgURL;
+//           link.download = 'swapped_image.jpg';
+//           document.body.appendChild(link);
+//           link.click();
+//           link.remove();
+//         };
+//       }
+//       if (data.recommendations?.length > 0) {
+//         modalRecommendations.textContent = "⚠️ " + data.recommendations.join(", ");
+//       }
+
+//     } catch (err) {
+//       Swal.close();
+//       Swal.fire("Network Error ❌", "Please try again later", "error");
+//       console.error(err);
+//     }
+//   });
+// });
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("faceSwapForm");
-  const inputImage = document.querySelector('input[name="inputImage"]');
-  const styleImage = document.querySelector('input[name="styleImage"]');
+  const inputImage = form.querySelector('input[name="inputImage"]');
+  const styleImage = form.querySelector('input[name="styleImage"]');
   const inputPreview = document.getElementById("inputPreview");
   const stylePreview = document.getElementById("stylePreview");
   const termsCheckbox = document.getElementById("termsCheckbox");
@@ -14,13 +119,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalRecommendations = document.getElementById("modalRecommendations");
   const modalDownloadBtn = document.getElementById("modalDownloadBtn");
 
-  // Preview logic
+  // Image preview
   function readAndPreview(fileInput, previewImg) {
     if (fileInput.files && fileInput.files[0]) {
       const reader = new FileReader();
       reader.onload = e => {
         previewImg.src = e.target.result;
-        previewImg.style.display = "block";
+        previewImg.classList.remove("hidden");
       };
       reader.readAsDataURL(fileInput.files[0]);
     }
@@ -29,23 +134,15 @@ document.addEventListener("DOMContentLoaded", () => {
   inputImage.addEventListener("change", () => readAndPreview(inputImage, inputPreview));
   styleImage.addEventListener("change", () => readAndPreview(styleImage, stylePreview));
 
-  // Camera button
-  cameraBtn.addEventListener("click", () => {
-    const choice = cameraSelect.value;
-    if (choice) {
-      inputImage.setAttribute("capture", choice);
-    } else {
-      inputImage.removeAttribute("capture");
-    }
-    inputImage.click();
-  });
-
   // Close modal
   closeModal.addEventListener("click", () => {
-    modal.style.display = "none";
+    modal.classList.add("hidden");
+    modalSwappedImg.src = "";
+    modalMessage.textContent = "";
+    modalRecommendations.textContent = "";
   });
 
-  // Submit via fetch
+  // Submit form via fetch
   form.addEventListener("submit", async e => {
     e.preventDefault();
 
@@ -73,29 +170,28 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Clear form
+      // Reset form and previews
       form.reset();
-      inputPreview.style.display = "none";
-      stylePreview.style.display = "none";
+      inputPreview.classList.add("hidden");
+      stylePreview.classList.add("hidden");
 
-      // Show modal with results
-      modal.style.display = "block";
-      modalMessage.textContent = data.message;
+      // Show result modal
+      modal.classList.remove("hidden");
+      modalMessage.textContent = data.message || "Face swap complete!";
       if (data.swappedImgURL) {
         modalSwappedImg.src = data.swappedImgURL;
         modalDownloadBtn.onclick = () => {
-          const link = document.createElement('a');
+          const link = document.createElement("a");
           link.href = data.swappedImgURL;
-          link.download = 'swapped_image.jpg';
+          link.download = "swapped_image.jpg";
           document.body.appendChild(link);
           link.click();
           link.remove();
         };
       }
-      if (data.recommendations?.length > 0) {
+      if (data.recommendations?.length) {
         modalRecommendations.textContent = "⚠️ " + data.recommendations.join(", ");
       }
-
     } catch (err) {
       Swal.close();
       Swal.fire("Network Error ❌", "Please try again later", "error");
