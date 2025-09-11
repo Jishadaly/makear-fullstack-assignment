@@ -23,7 +23,7 @@
               <td class="px-4 py-3 text-gray-600"><%= sub.phone %></td>
               <td class="px-4 py-3">
                 <% if(sub.swappedImage) { %>
-                  <% let imgSrc = sub.swappedImage.swappedImgURL || `/uploads/${sub.swappedImage.filename}`; %>
+                  <% let imgSrc = sub.swappedImgURL || `/uploads/${sub.swappedImage.filename}`; %>
                   <img src="<%= imgSrc %>" 
                        alt="Swapped"
                        class="w-16 h-16 object-cover rounded-md cursor-pointer previewBtn border"
@@ -35,7 +35,7 @@
               
               <td class="px-4 py-3">
                 <% if (sub.swappedImage) { %>
-                  <% if (sub.swappedImage.swappedImgURL) { %>
+                  <% if (sub.swappedImgURL) { %>
                     <a href="<%= sub.swappedImage.swappedImgURL %>" 
                        download 
                        class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">
