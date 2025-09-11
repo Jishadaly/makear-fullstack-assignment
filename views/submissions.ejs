@@ -11,7 +11,7 @@
             <th class="px-4 py-3 text-left">Name</th>
             <th class="px-4 py-3 text-left">Email</th>
             <th class="px-4 py-3 text-left">Phone</th>
-            <th class="px-4 py-3 text-left">Original</th>
+            <th class="px-4 py-3 text-left">Preview</th>
             <th class="px-4 py-3 text-left">Swapped</th>
           </tr>
         </thead>
@@ -22,15 +22,17 @@
               <td class="px-4 py-3 text-gray-600"><%= sub.email %></td>
               <td class="px-4 py-3 text-gray-600"><%= sub.phone %></td>
               <td class="px-4 py-3">
-                <% if(sub.originalImage) { %>
-                  <img src="/uploads/<%= sub.originalImage.filename %>" 
-                       alt="Original"
+                <% if(sub.swappedImage) { %>
+                  <% let imgSrc = sub.swappedImage.swappedImgURL || `/uploads/${sub.swappedImage.filename}`; %>
+                  <img src="<%= imgSrc %>" 
+                       alt="Swapped"
                        class="w-16 h-16 object-cover rounded-md cursor-pointer previewBtn border"
-                       data-src="/uploads/<%= sub.originalImage.filename %>">
+                       data-src="<%= imgSrc %>">
                 <% } else { %>
                   <span class="text-gray-400">N/A</span>
                 <% } %>
               </td>
+              
               <td class="px-4 py-3">
                 <% if (sub.swappedImage) { %>
                   <% if (sub.swappedImage.swappedImgURL) { %>
