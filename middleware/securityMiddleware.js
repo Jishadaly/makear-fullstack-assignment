@@ -1,7 +1,3 @@
-/**
- * Custom security middleware
- * Adds headers not covered by helmet and basic request validation
- */
 
 const securityHeaders = (req, res, next) => {
   // Extra security headers

@@ -6,17 +6,12 @@ class Submission {
     this.collectionName = "submissions";
   }
 
-  /**
-   * Get MongoDB collection
-   */
   getCollection() {
     const db = getDB();
     return db.collection(this.collectionName);
   }
 
-  /**
-   * Create a new submission
-   */
+
   async create(submissionData) {
     const collection = this.getCollection();
 
@@ -38,6 +33,7 @@ class Submission {
 
     return { _id: result.insertedId, ...document };
   }
+
   async findAll({ page = 1, limit = 10, search = '', sortBy = 'createdAt', sortOrder = -1 }) {
     const collection = this.getCollection();
     const query = search
@@ -60,9 +56,8 @@ class Submission {
         totalPages: Math.ceil(total / limit)
       }
     };
+
   }
-  
-  
   
   async getStats() {
     const collection = this.getCollection();
@@ -72,29 +67,21 @@ class Submission {
     return { total, completed, pending };
   }
   
-
-  /**
-   * Find submission by ID
-   */
   async findById(id) {
     if (!ObjectId.isValid(id)) {
       throw new Error("Invalid submission ID format");
     }
-    const collection = this.getCollection();
-    return collection.findOne({ _id: new ObjectId(id), status: "active" });
+    const collection = await this.getCollection();
+    const submission = await collection.findOne({ _id: new ObjectId(id), status: "active" });
+    return submission; // returns null if not found
   }
 
-  /**
-   * Find submission by email
-   */
   async findByEmail(email) {
     const collection = this.getCollection();
     return collection.findOne({ email, status: "active" });
   }
 
-  /**
-   * Validate submission data
-   */
+
   validateSubmissionData(data) {
     const required = ["name", "email", "phone"];
     for (const field of required) {
@@ -115,6 +102,7 @@ class Submission {
       throw new Error("Invalid email format");
     }
   }
+
 }
 
 module.exports = new Submission();

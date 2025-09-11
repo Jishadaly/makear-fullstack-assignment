@@ -1,14 +1,9 @@
-/**
- * File upload middleware
- * Secure image uploads with validation and processing
- */
-
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
 const sharp = require('sharp');
 
-// Ensure uploads directory exists
+
 const uploadDir = path.join(__dirname, '..', 'uploads');
 const createUploadDir = async () => {
   try {
@@ -19,7 +14,7 @@ const createUploadDir = async () => {
   return uploadDir;
 };
 
-// Multer config (memory storage → we process before saving)
+// Multer 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024 },
@@ -36,9 +31,6 @@ const upload = multer({
 ]);
 
 
-
-
-// Middleware wrapper for error handling
 const uploadMiddleware = (req, res, next) => {
   upload(req, res, err => {
     console.log(req.files)
@@ -48,26 +40,6 @@ const uploadMiddleware = (req, res, next) => {
     next();
   });
 };
-
-// Process and optimize image
-// const processImage = async (req, res, next) => {
-//   // console.log('processImage',req.file);
-//   if (!req.file) return next();
-
-//   try {
-//     const processed = await sharp(req.file.buffer)
-//       .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
-//       .jpeg({ quality: 85, progressive: true })
-//       .toBuffer();
-
-//     req.file.buffer = processed;
-//     next();
-//   } catch (err) {
-//     console.error('Image processing error:', err);
-//     res.status(400).json({ error: 'Invalid image file' });
-//   }
-// };
-
 
 const processImages = async (req, res, next) => {
   try {

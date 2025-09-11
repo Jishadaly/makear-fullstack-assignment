@@ -13,7 +13,7 @@ const {
 
 const submissionController = new SubmissionController();
 
-router.get("/", submissionController.showForm);
+
 router.post(
   "/submit",
   uploadMiddleware,          
@@ -24,7 +24,7 @@ router.post(
   submissionController.submitForm
 );
 
-// Show all submissions (with pagination, search, etc.)
+router.get("/", submissionController.showForm);
 router.get("/submissions", submissionController.showSubmissions);
 router.get("/submissions/:id", validateObjectId, submissionController.showSubmissionDetails);
 

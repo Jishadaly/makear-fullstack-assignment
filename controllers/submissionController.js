@@ -105,17 +105,27 @@ class SubmissionController {
       sortBy,
       sortOrder: req.query.sortOrder || 'desc'
     });
-});
+  });
 
 
   showSubmissionDetails = asyncHandler(async (req, res) => {
     const submission = await Submission.findById(req.params.id);
     if (!submission) throw new AppError('Submission not found', 404);
 
-    res.render('submission-details', {
-      title: 'Submission Details',
-      pageTitle: `Submission by ${submission.name}`,
-      submission
+    res.status(200).json({
+      success: true,
+      submission: {
+        id: submission._id,
+        name: submission.name,
+        email: submission.email,
+        phone: submission.phone,
+        originalImage: submission.originalImage,
+        swappedImage: submission.swappedImage,
+        swappedImgURL: submission.swappedImgURL,
+        processingStatus: submission.processingStatus,
+        createdAt: submission.createdAt,
+        updatedAt: submission.updatedAt
+      }
     });
   });
 
@@ -155,58 +165,6 @@ class SubmissionController {
     res.json({ success: true, message: 'Submission deleted successfully' });
   });
 
-
-  retryFaceSwap = asyncHandler(async (req, res) => {
-    const submission = await Submission.findById(req.params.id);
-    if (!submission) throw new AppError('Submission not found', 404);
-    if (submission.swappedImage) throw new AppError('Face swap already completed', 400);
-
-    // Read original image
-    const originalBuffer = await fs.readFile(submission.originalImage.path);
-    const inputFile = {
-      buffer: originalBuffer,
-      mimetype: submission.originalImage.mimetype,
-      originalname: submission.originalImage.filename
-    };
-
-    // Get style image
-    if (!submission.styleImage || !submission.styleImage.path) {
-      throw new AppError('Style image not found for retry', 400);
-    }
-    const styleBuffer = await fs.readFile(submission.styleImage.path);
-    const styleFile = {
-      buffer: styleBuffer,
-      mimetype: submission.styleImage.mimetype || 'image/jpeg',
-      originalname: submission.styleImage.filename
-    };
-
-    // Retry face swap
-    let swappedBuffer, outputUrl;
-    try {
-      swappedBuffer = await faceSwapService.swapFace(inputFile, styleFile);
-      // Save locally
-      const swappedFilename = generateFilename(submission.originalImage.filename, 'swapped');
-      const swappedPath = await saveImage(swappedBuffer, swappedFilename);
-
-      // Update submission
-      submission.swappedImage = {
-        filename: swappedFilename,
-        path: swappedPath,
-        url: null // you can set URL if you have a hosted path
-      };
-      submission.processingStatus = 'completed';
-      await submission.save();
-
-      res.json({
-        success: true,
-        message: 'Face swap retried successfully',
-        swappedImage: submission.swappedImage
-      });
-    } catch (err) {
-      console.error('Face swap retry failed:', err.message);
-      throw new AppError('Face swap retry failed, please try again later.', 502);
-    }
-  });
 
 
 }

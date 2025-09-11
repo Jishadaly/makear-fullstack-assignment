@@ -1,32 +1,37 @@
-/**
- * Validation middleware
- * Input validation, sanitization, and error handling
- */
-
 const { body, validationResult } = require('express-validator');
 
-// Validation rules for submissions
+
+const stripHtml = value => {
+  if (typeof value !== 'string') return '';
+  return value.replace(/<[^>]*>/g, '').trim();
+};
+
+// Validation rules for submissions with sanitization
 const submissionValidationRules = () => [
   body('name')
     .trim()
+    .customSanitizer(stripHtml)
     .isLength({ min: 4, max: 30 }).withMessage('Name must be 4–30 characters')
     .matches(/^[a-zA-Z\s]+$/).withMessage('Name must contain only letters and spaces'),
 
   body('email')
     .trim()
+    .customSanitizer(stripHtml)
     .isEmail().withMessage('Invalid email address')
     .normalizeEmail(),
 
   body('phone')
     .trim()
+    .customSanitizer(stripHtml)
     .matches(/^\d{10}$/).withMessage('Phone number must be 10 digits'),
 
   body('terms')
+    .trim()
+    .customSanitizer(stripHtml)
     .equals('true').withMessage('Terms and conditions must be accepted'),
 ];
 
-// File validation (basic)
-// File validation (for .fields())
+
 const validateFile = (req, res, next) => {
   const inputFile = req.files?.inputImage?.[0]; // main image
   if (!inputFile) {

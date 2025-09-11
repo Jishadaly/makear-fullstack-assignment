@@ -6,15 +6,12 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
-
 // Custom modules
 const { connectDB } = require('./config/database');
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 const { securityHeaders } = require('./middleware/securityMiddleware');
-
-
 const submissionRoutes = require('./routes/submissionRoutes');
-
+const expressLayouts = require('express-ejs-layouts');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -72,11 +69,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // View engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-const expressLayouts = require('express-ejs-layouts');
 app.use(expressLayouts);
 app.set('layout', 'layout');
-
-
 
 app.use('/', submissionRoutes);
 
