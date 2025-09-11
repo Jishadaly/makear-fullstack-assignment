@@ -6,12 +6,21 @@
 
 ## Features
 
-- Upload an input image and optional style image.
+- Upload an input image and style image.
 - Input validation and sanitization.
 - File type and size checks for uploads.
 - JSON API responses for submissions and retrievals.
 - SweetAlert2 integration for client-side notifications.
 - Preview and download of swapped images.
+
+---
+
+## Example Flow:
+
+- Fill in your Name, Phone, and Email.
+- Upload your Input Image (your face).
+- upload a Style Image (template you want your face to fit into).
+- Submit the form → face swap happens → view and download the result.
 
 ---
 

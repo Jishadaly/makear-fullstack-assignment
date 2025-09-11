@@ -46,7 +46,7 @@
 
       <!-- Style Image -->
       <div>
-        <label class="block text-sm font-medium text-green-800">Style Image (Optional)</label>
+        <label class="block text-sm font-medium text-green-800">Style Image</label>
         <input type="file" name="styleImage" accept="image/*"
           class="mt-1 block w-full text-sm text-green-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-100 file:text-green-800 hover:file:bg-green-200 cursor-pointer" />
         <img id="stylePreview" class="hidden mt-3 rounded-lg shadow-md max-w-full max-h-48 border border-green-200"
@@ -172,9 +172,7 @@
               link.remove();
             };
           }
-          if (data.recommendations?.length) {
-            modalRecommendations.textContent = "⚠️ " + data.recommendations.join(", ");
-          }
+
         } catch (err) {
           Swal.close();
           Swal.fire("Network Error ❌", "Please try again later", "error");
