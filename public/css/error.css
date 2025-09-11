@@ -1,0 +1,31 @@
+.error-container {
+    text-align: center;
+    padding: 80px 20px;
+    color: #333;
+  }
+  
+  .error-container h1 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: #e74c3c;
+  }
+  
+  .error-container p {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+  }
+  
+  .btn-home {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-home:hover {
+    background-color: #2980b9;
+  }
+  

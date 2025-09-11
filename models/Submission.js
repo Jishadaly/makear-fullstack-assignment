@@ -38,6 +38,40 @@ class Submission {
 
     return { _id: result.insertedId, ...document };
   }
+  async findAll({ page = 1, limit = 10, search = '', sortBy = 'createdAt', sortOrder = -1 }) {
+    const collection = this.getCollection();
+    const query = search
+      ? { name: { $regex: search, $options: 'i' } }
+      : {};
+  
+    const total = await collection.countDocuments(query);
+    const submissions = await collection.find(query)
+      .sort({ [sortBy]: sortOrder })   // sort by createdAt desc
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
+  
+    return {
+      submissions,
+      pagination: {
+        currentPage: page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
+  
+  
+  
+  async getStats() {
+    const collection = this.getCollection();
+    const total = await collection.countDocuments();
+    const completed = await collection.countDocuments({ processingStatus: "completed" });
+    const pending = total - completed;
+    return { total, completed, pending };
+  }
+  
 
   /**
    * Find submission by ID

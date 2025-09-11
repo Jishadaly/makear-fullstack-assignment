@@ -67,13 +67,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Static files
 app.use('/public', express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // View engine
-app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+const expressLayouts = require('express-ejs-layouts');
+app.use(expressLayouts);
+app.set('layout', 'layout');
 
-// Routes
-// app.use('/', indexRoutes);
+
+
 app.use('/', submissionRoutes);
 
 // Health check

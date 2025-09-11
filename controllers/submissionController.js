@@ -68,9 +68,8 @@ class SubmissionController {
         mimetype: uploadedFile.mimetype
       },
       swappedImage: swappedPath ? { filename: path.basename(swappedPath), path: swappedPath } : null,
-      swappedImgURL: outputUrl ? outputUrl : null,
+      swappedImgURL: swappedImgURL ? swappedImgURL : null,
       processingStatus: swappedPath ? 'completed' : 'partial',
-      clientIP: req.clientIP,
       userAgent: req.get('User-Agent')
     });
 
@@ -88,7 +87,7 @@ class SubmissionController {
 
   showSubmissions = asyncHandler(async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(50, parseInt(req.query.limit) || 10);
+    const limit = Math.min(150, parseInt(req.query.limit) || 100);
     const search = req.query.search || '';
     const sortBy = req.query.sortBy || 'createdAt';
     const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
@@ -106,7 +105,8 @@ class SubmissionController {
       sortBy,
       sortOrder: req.query.sortOrder || 'desc'
     });
-  });
+});
+
 
   showSubmissionDetails = asyncHandler(async (req, res) => {
     const submission = await Submission.findById(req.params.id);

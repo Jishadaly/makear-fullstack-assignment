@@ -95,7 +95,7 @@ class FaceSwapService {
           throw new Error("Face swap failed on server");
         }
       }
-
+      
       if (!outputUrl) throw new Error("Face swap timed out");
       console.log('outURL', outputUrl)
 
