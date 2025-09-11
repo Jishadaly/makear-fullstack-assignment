@@ -59,10 +59,11 @@ NODE_ENV=development
 
 You can view and test the API endpoints directly in Postman using the official collection:
 
-[Postman Documentation & Collection](https://documenter.getpostman.com/view/30898790/2sB3HooeGF#65b4cbc4-da98-47b0-b71d-db68a95eb547)
+[Postman Documentation & Collection](https://documenter.getpostman.com/view/30898790/2sB3HooeGF)
 
 This collection includes:
 
+* **GET** `/` – Get Form page.
 * **POST** `/submit` – Submit a new face swap request.
 * **GET** `/submissions` – Retrieve all submissions.
 * **GET** `/submissions/:id` – Retrieve a single submission by ID.
