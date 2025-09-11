@@ -1,97 +1,116 @@
-/**
- * Face Swap Service
- * Handles API calls to external face swap service
- */
 
 const axios = require('axios');
-const FormData = require('form-data');
+
 
 class FaceSwapService {
   constructor() {
-    this.apiUrl = process.env.FACE_SWAP_API_URL || 'https://api.faceswap.dev/v1';
-    this.apiKey = process.env.FACE_SWAP_API_KEY;
+    this.apiUrl = process.env.FACE_SWAP_API_URL;
+    this.apiKey = process.env.FACE_SWAP_API_KEY || 'f1ae6feb20b94cf2b7bfad2721eda29a_667dcff57f6a4b308f3f23bff13a5786_andoraitools';
     this.timeout = 30000; // 30 seconds timeout
-    
+
     if (!this.apiKey) {
       console.warn('⚠️ Face Swap API key not provided. Service will use mock responses.');
     }
   }
 
-  /**
-   * Initialize axios instance with default config
-   */
   getAxiosInstance() {
     return axios.create({
       baseURL: this.apiUrl,
       timeout: this.timeout,
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'User-Agent': 'FaceSwap-App/1.0.0'
+        'x-api-key': this.apiKey,
+        'Content-Type': 'image/jpeg',
       }
+
     });
   }
 
-  /**
-   * Perform face swap operation
-   * @param {Buffer} sourceImageBuffer - Original image buffer
-   * @param {Buffer} targetImageBuffer - Target face image buffer (optional)
-   * @returns {Promise<Buffer>} Swapped image buffer
-   */
-  async swapFace(sourceImageBuffer, targetImageBuffer = null) {
+
+  async swapFace(inputImageBuffer, styleImageBuffer) {
     try {
-      // If no API key provided, return mock swapped image
-      if (!this.apiKey) {
-        return this.mockFaceSwap(sourceImageBuffer);
-      }
+      if (!this.apiKey) throw new Error("API key is required");
 
-      const formData = new FormData();
-      formData.append('source_image', sourceImageBuffer, {
-        filename: 'source.jpg',
-        contentType: 'image/jpeg'
-      });
+      // Helper function to upload image and get imageUrl
+      const uploadImageToLightX = async (buffer, mimetype) => {
+        const uploadRes = await axios.post(
+          `${this.apiUrl}/uploadImageUrl`,
+          {
+            uploadType: "imageUrl",
+            size: buffer.length,
+            contentType: mimetype
+          },
+          { headers: { "x-api-key": this.apiKey, "Content-Type": "application/json" } }
+        );
 
-      // If target image provided, use it; otherwise use default celebrity face
-      if (targetImageBuffer) {
-        formData.append('target_image', targetImageBuffer, {
-          filename: 'target.jpg',
-          contentType: 'image/jpeg'
+        const { uploadImage, imageUrl } = uploadRes.data.body;
+        if (!uploadImage || !imageUrl) throw new Error("Failed to get upload URL");
+
+        // PUT actual image
+        await axios.put(uploadImage, buffer, {
+          headers: { "Content-Type": mimetype, "Content-Length": buffer.length }
         });
-      } else {
-        // Use default celebrity face or template
-        formData.append('use_template', 'celebrity_1');
+
+        return imageUrl;
+      };
+
+      // 1️⃣ Upload input image
+      const inputImageUrl = await uploadImageToLightX(inputImageBuffer.buffer, inputImageBuffer.mimetype);
+
+      // 2️⃣ Upload style image
+      const styleImageUrl = await uploadImageToLightX(styleImageBuffer.buffer, styleImageBuffer.mimetype);
+
+      // 3️⃣ Trigger face swap
+      const swapRes = await axios.post(
+        `${this.apiUrl.replace("v2", "v1")}/face-swap`,
+        { imageUrl: inputImageUrl, styleImageUrl },
+        { headers: { "x-api-key": this.apiKey, "Content-Type": "application/json" } }
+      );
+
+      console.log('inputImgURL', inputImageUrl)
+      console.log('styleinputImgURL', styleImageUrl)
+      console.log('swapRes11111', swapRes.status)
+
+
+      const { orderId, maxRetriesAllowed } = swapRes.data.body;
+      if (!orderId) throw new Error("Failed to create face swap order");
+
+      // 4️⃣ Poll for result (max 5 retries, every 3 seconds)
+      let outputUrl = null;
+      for (let i = 0; i < maxRetriesAllowed; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+
+        const statusRes = await axios.post(
+          `${this.apiUrl.replace("v2", "v1")}/order-status`,
+          { orderId },
+          { headers: { "x-api-key": this.apiKey, "Content-Type": "application/json" } }
+        );
+
+        const statusBody = statusRes.data.body;
+        if (!statusBody) continue;
+
+        if (statusBody.status === "active") {
+          outputUrl = statusBody.output;
+          break;
+        } else if (statusBody.status === "failed") {
+          throw new Error("Face swap failed on server");
+        }
       }
 
-      // Additional parameters
-      formData.append('quality', 'high');
-      formData.append('enhance', 'true');
+      if (!outputUrl) throw new Error("Face swap timed out");
+      console.log('outURL', outputUrl)
 
-      const axiosInstance = this.getAxiosInstance();
-      
-      const response = await axiosInstance.post('/swap', formData, {
-        headers: {
-          ...formData.getHeaders()
-        },
-        responseType: 'arraybuffer'
-      });
+      // 5️⃣ Download final swapped image
+      const finalImageRes = await axios.get(outputUrl, { responseType: "arraybuffer" });
+      return { buffer: Buffer.from(finalImageRes.data), outputUrl }
 
-      if (response.status !== 200) {
-        throw new Error(`Face swap API returned status: ${response.status}`);
-      }
-
-      return Buffer.from(response.data);
-
-    } catch (error) {
-      console.error('Face swap error:', error.message);
-      
-      // If API fails, return mock result
-      if (error.response?.status >= 400) {
-        console.log('API error, falling back to mock response');
-        return this.mockFaceSwap(sourceImageBuffer);
-      }
-      
-      throw new Error('Face swap service temporarily unavailable');
+    } catch (err) {
+      console.error("Face swap error:", err.response?.data || err.message);
+      throw new Error("Face swap failed, please try again later.");
     }
   }
+
+
+
 
   /**
    * Get available face templates/celebrities
@@ -140,7 +159,7 @@ class FaceSwapService {
 
     } catch (error) {
       console.error('Service status check error:', error.message);
-      
+
       return {
         status: 'offline',
         available: false,
@@ -158,7 +177,7 @@ class FaceSwapService {
   async mockFaceSwap(sourceImageBuffer) {
     try {
       const sharp = require('sharp');
-      
+
       // Create a simple transformation to simulate face swap
       // In reality, this would be replaced by actual face swap logic
       const processedImage = await sharp(sourceImageBuffer)
@@ -249,7 +268,7 @@ class FaceSwapService {
       // Check file size vs dimensions (quality indicator)
       const pixelCount = metadata.width * metadata.height;
       const bytesPerPixel = imageBuffer.length / pixelCount;
-      
+
       if (bytesPerPixel < 0.5) {
         validation.recommendations.push('Image appears heavily compressed, results may vary');
       }

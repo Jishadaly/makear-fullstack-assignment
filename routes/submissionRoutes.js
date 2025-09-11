@@ -3,7 +3,7 @@ const router = express.Router();
 
 const SubmissionController = require("../controllers/submissionController");
 
-const { uploadMiddleware, processImage } = require("../middleware/uploadMiddleware");
+const { uploadMiddleware, processImages } = require("../middleware/uploadMiddleware");
 const { 
   submissionValidationRules, 
   handleValidationErrors, 
@@ -20,7 +20,7 @@ router.post(
   validateFile,             
   submissionValidationRules(), 
   handleValidationErrors,   
-  processImage,              
+  processImages,              
   submissionController.submitForm
 );
 

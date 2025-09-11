@@ -22,21 +22,26 @@ const createUploadDir = async () => {
 // Multer config (memory storage → we process before saving)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB max
+  limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
- 
     const allowed = /jpeg|jpg|png/;
     const ext = allowed.test(path.extname(file.originalname).toLowerCase());
     const mime = allowed.test(file.mimetype);
     if (ext && mime) cb(null, true);
     else cb(new Error('Only .jpeg, .jpg, .png allowed'));
   },
-}).single('image');
+}).fields([
+  { name: 'inputImage', maxCount: 1 },
+  { name: 'styleImage', maxCount: 1 } // optional
+]);
+
+
+
 
 // Middleware wrapper for error handling
 const uploadMiddleware = (req, res, next) => {
   upload(req, res, err => {
-
+    console.log(req.files)
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -45,23 +50,43 @@ const uploadMiddleware = (req, res, next) => {
 };
 
 // Process and optimize image
-const processImage = async (req, res, next) => {
-  console.log('processImage',req.file);
-  if (!req.file) return next();
+// const processImage = async (req, res, next) => {
+//   // console.log('processImage',req.file);
+//   if (!req.file) return next();
 
+//   try {
+//     const processed = await sharp(req.file.buffer)
+//       .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
+//       .jpeg({ quality: 85, progressive: true })
+//       .toBuffer();
+
+//     req.file.buffer = processed;
+//     next();
+//   } catch (err) {
+//     console.error('Image processing error:', err);
+//     res.status(400).json({ error: 'Invalid image file' });
+//   }
+// };
+
+
+const processImages = async (req, res, next) => {
   try {
-    const processed = await sharp(req.file.buffer)
-      .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 85, progressive: true })
-      .toBuffer();
-
-    req.file.buffer = processed;
+    for (const key of ['inputImage', 'styleImage']) {
+      if (req.files[key]) {
+        const file = req.files[key][0];
+        file.buffer = await sharp(file.buffer)
+          .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 85, progressive: true })
+          .toBuffer();
+      }
+    }
     next();
   } catch (err) {
     console.error('Image processing error:', err);
     res.status(400).json({ error: 'Invalid image file' });
   }
 };
+
 
 // Save processed file
 const saveImage = async (buffer, originalname) => {
@@ -90,7 +115,8 @@ const deleteFile = async (filepath) => {
 
 module.exports = {
   uploadMiddleware,
-  processImage,
+  processImages,
   saveImage,
   deleteFile,
+  generateFilename
 };

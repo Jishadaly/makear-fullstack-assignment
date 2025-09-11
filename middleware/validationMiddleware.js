@@ -26,23 +26,37 @@ const submissionValidationRules = () => [
 ];
 
 // File validation (basic)
+// File validation (for .fields())
 const validateFile = (req, res, next) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'Image file is required' });
+  const inputFile = req.files?.inputImage?.[0]; // main image
+  if (!inputFile) {
+    return res.status(400).json({ error: 'Input image file is required' });
   }
 
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-  if (!allowedTypes.includes(req.file.mimetype)) {
+  if (!allowedTypes.includes(inputFile.mimetype)) {
     return res.status(400).json({ error: 'Only JPEG, JPG, PNG files allowed' });
   }
 
   const maxSize = 2 * 1024 * 1024; // 2MB
-  if (req.file.size > maxSize) {
+  if (inputFile.size > maxSize) {
     return res.status(400).json({ error: 'File size must not exceed 2MB' });
+  }
+
+  // Optional style image validation
+  const styleFile = req.files?.styleImage?.[0];
+  if (styleFile) {
+    if (!allowedTypes.includes(styleFile.mimetype)) {
+      return res.status(400).json({ error: 'Only JPEG, JPG, PNG files allowed for style image' });
+    }
+    if (styleFile.size > maxSize) {
+      return res.status(400).json({ error: 'Style image file size must not exceed 2MB' });
+    }
   }
 
   next();
 };
+
 
 // Handle validation errors
 const handleValidationErrors = (req, res, next) => {

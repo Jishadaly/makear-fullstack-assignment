@@ -1,7 +1,7 @@
 {
   "name": "makear-fullstack-assignment",
   "version": "1.0.0",
-  "description": "Server-rendered form application for MakeAR.ai that collects user details and photos, validates and sanitizes inputs, integrates with a face-swap API, stores submissions in MongoDB Atlas, and displays a submissions list with image downloads.",
+  "description": "Server-rendered form application for MakeAR.ai that collects user details and photos, validates and sanitizes inputs, integrates with a face-swap API,stores submissions in MongoDB Atlas, and displays a submissions list with image downloads.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
